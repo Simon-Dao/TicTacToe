@@ -27,7 +27,10 @@ public class TicTacToe extends Application {
     int height = 600;
     int scale = 200;
     int count = 0;
+    
     boolean running = true;
+    boolean showWinScreen = false;
+    
     GraphicsContext gc;
     Scene scene;
     String title = "Tic Tac Toe";
@@ -36,25 +39,8 @@ public class TicTacToe extends Application {
     int mouseX;
     int mouseY;
     
-    Node[][] map = new Node[3][3];
     boolean[][] Xmap = new boolean[3][3];
     boolean[][] Omap = new boolean[3][3];
-    
-    class Node {
-        public int x;
-        public int y;
-        //boolean O;
-        boolean X;
-        Node(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-        
-        boolean setX(boolean X) {
-            this.X = X;
-            return X;
-        }
-    }
     
     @Override
     public void start(Stage primaryStage) {
@@ -66,9 +52,23 @@ public class TicTacToe extends Application {
         scene = new Scene(layout, width, height);
         
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keys ->{
-        if(keys.getCode() == KeyCode.ESCAPE){
+            if(keys.getCode() == KeyCode.ESCAPE){
             primaryStage.close();
         }   
+        });
+        
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, keys -> {
+            if(keys.getCode() == KeyCode.SPACE) {
+                showWinScreen = false;
+                clearBoard(gc);
+                System.out.println(showWinScreen);
+                for(int i = 0;i<3;i++) {
+                    for(int j = 0;j<3;j++) {
+                        Omap[i][j] = false;
+                        Xmap[i][j] = false;
+                    }
+                }
+            }
         });
         
         scene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, mouse ->
@@ -121,8 +121,6 @@ public class TicTacToe extends Application {
     }
 
     void tick(GraphicsContext gc){
-        drawMap(gc);
-        
         gc.setFill(Color.GREY);
         gc.fillRoundRect(195, 0, 10, 600, 25, 25);
         gc.fillRoundRect(395, 0, 10, 600, 25, 25);
@@ -132,13 +130,14 @@ public class TicTacToe extends Application {
         gc.fillRoundRect(0, 395, 600, 10, 25, 25);
         gc.fillRoundRect(0, 695, 600, 10, 25, 25);
         
+        drawMap(gc);
         checkIfWin();
+        setWinScreen(gc);
     }
 
     void setMap() {
         for(int i = 0;i<3;i++){
             for(int j = 0;j<3;j++){
-                map[i][j] = new Node(i,j);
                Xmap[i][j] = false;
                Omap[i][j] = false;
             }
@@ -164,7 +163,6 @@ public class TicTacToe extends Application {
     }
     
     void checkIfWin() {
-        
         //check X map
         //check vertical
         for(int i=0;i<3;i++) {
@@ -176,7 +174,7 @@ public class TicTacToe extends Application {
                 
                 if(Xstreak == 3) {
                     winner = "X";
-                    setWinScreen(gc);
+                    showWinScreen = true;
                 }
             }
         }
@@ -189,7 +187,7 @@ public class TicTacToe extends Application {
                 }
                 if(Xstreak == 3) {
                     winner = "X";
-                    setWinScreen(gc);
+                    showWinScreen = true;
                 }
             }
         }
@@ -201,7 +199,7 @@ public class TicTacToe extends Application {
             }
             if(Xleft == 3) {
                     winner = "X"; 
-                    setWinScreen(gc);
+                    showWinScreen = true;
             }
         }
         //check right digonal
@@ -215,7 +213,7 @@ public class TicTacToe extends Application {
             if(Xright == 3) {
                System.out.println(winner);
                     winner = "X"; 
-                    setWinScreen(gc);
+                    showWinScreen = true;
             }
         }
         
@@ -229,7 +227,7 @@ public class TicTacToe extends Application {
                 }
                 if(Ostreak == 3) {
                     winner = "O";
-                    setWinScreen(gc);
+                    showWinScreen = true;
                 }
             }
         }
@@ -242,7 +240,7 @@ public class TicTacToe extends Application {
                 }
                 if(Ostreak == 3) {
                     winner = "O";
-                    setWinScreen(gc);
+                    showWinScreen = true;
                 }
             }
         }
@@ -254,7 +252,7 @@ public class TicTacToe extends Application {
             }
             if(left == 3) {
                     winner = "O"; 
-                    setWinScreen(gc);
+                    showWinScreen = true;
             }
         }
         //check right digonal
@@ -267,19 +265,41 @@ public class TicTacToe extends Application {
             }
             if(Yright == 3) {
                     winner = "O"; 
-                    setWinScreen(gc);
+                    showWinScreen = true;
             }
         }
     }
     
     void setWinScreen(GraphicsContext gc) {
-        gc.setFill(Color.CHARTREUSE);
-        gc.fillRoundRect(100, 200, 400, 200, 40, 40);
         
-        gc.setFill(Color.BLUE);
-        gc.setFont(new Font("",100));
-        gc.fillText(winner+" wins!", 130, 330);
+        if(showWinScreen == true) {
+            System.out.println(showWinScreen);
+            gc.setFill(Color.CHARTREUSE);
+            gc.fillRoundRect(100, 200, 400, 200, 40, 40);
+        
+            gc.setFill(Color.BLUE);
+            gc.setFont(new Font("",100));
+            gc.fillText(winner+" wins!", 130, 330);
+        
+            gc.setFont(new Font("",30));
+            gc.fillText("press space to replay!", 140, 370);
+        }
     }
+    
+    void clearBoard(GraphicsContext gc) {
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, 600, 600);
+        
+        gc.setFill(Color.GREY);
+        gc.fillRoundRect(195, 0, 10, 600, 25, 25);
+        gc.fillRoundRect(395, 0, 10, 600, 25, 25);
+        gc.fillRoundRect(695, 0, 10, 600, 25, 25);
+        
+        gc.fillRoundRect(0, 195, 600, 10, 25, 25);
+        gc.fillRoundRect(0, 395, 600, 10, 25, 25);
+        gc.fillRoundRect(0, 695, 600, 10, 25, 25);
+    }
+    
     /**
      * @param args the command line arguments
      */
